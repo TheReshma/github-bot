@@ -1,6 +1,6 @@
-# git-bot
+### GitHub bot for spect.network
 
-> A GitHub App built with [Probot](https://github.com/probot/probot) that A Probot app
+> A GitHub App built with [Probot](https://github.com/probot/probot) 
 
 ## Setup
 
@@ -12,22 +12,20 @@ npm install
 npm start
 ```
 
-## Docker
+## Environment variables
 
-```sh
-# 1. Build container
-docker build -t git-bot .
+Go to [https://smee.io/](https://smee.io/) and start a new channel. Copy the Webhook Proxy URL, that's ```WEBHOOK_PROXY_URL```
 
-# 2. Start container
-docker run -e APP_ID=<app-id> -e PRIVATE_KEY=<pem-value> git-bot
-```
+Navigate to [GitHub Developer Settings](https://github.com/settings/apps) and create an app. Create a webhook secret. You'll get the ```APP_ID``` & ```WEBHOOK_SECRET``` .
 
-## Contributing
+Under [Personal Access Tokens](https://github.com/settings/tokens), you can generate a new Token to access the GitHub API. Save the ```.pem``` file in the working directory.
 
-If you have suggestions for how git-bot could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
+## Documentation
 
-For more, check out the [Contributing Guide](CONTRIBUTING.md).
+[Webhook Events and Payloads](https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads)
 
-## License
+[Octokit Webhooks](https://github.com/octokit/webhooks.js#webhook-events)
 
-[ISC](LICENSE) © 2022 Reshma <reshmashaik3011@gmail.com>
+[Probot](https://probot.github.io/docs/webhooks/)
+
+[Smee Client](https://github.com/probot/smee-client)
