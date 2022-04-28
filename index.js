@@ -3,11 +3,12 @@
  * @param {import('probot').Probot} app
  */
 
+ const axios = require('axios');
  const SmeeClient = require('smee-client')
 
  const smee = new SmeeClient({
    source: process.env.WEBHOOK_PROXY_URL,
-   target: 'http://localhost:3000/events',
+   target: 'http://localhost:4000/events',
    logger: console
  })
  
@@ -19,49 +20,59 @@
 
 module.exports = (app) => {
   
-  app.log.info("Yay, the app was loaded!");
+  app.log.info("Yay, the app has loaded!");
   
   app.on('pull_request.opened', receive);
 
+  const server_url = process.env.MORALIS_SERVER_ID ;
+  const app_id = process.env.MORALIS_APPLICATION_ID;
+  let comment ;
   
     async function receive(context) {
 
-      const name = String(context.payload.pull_request.user.login);
-      const nameUrl = String(context.payload.pull_request.user.url);
-      const prBody = String(context.payload.pull_request.body).trim();
-      const prLink = String(context.payload.pull_request.html_url);
-
-      const keywords = prBody.split(' ',6);
+      const prhead = String(context.payload.pull_request.title).trim();
+      const keywords = prhead.split(' ',2);
       const essential = keywords[0];
-      const tribe = keywords[1];
-      const space = keywords[2];
-      const taskId = keywords[3];
-      const userId = keywords[4];
+      const taskId = keywords[1];
 
-      const comment = "Hey ["+name+"]("+nameUrl+"), your [Pull Request]("+prLink+") has been received by Spect!";
+      if (essential == "Spect"){
 
-      // axios.post(`https://tribes.spect.network/tribe/${tribe}/space/${space}/${taskId}`, {
-      //   nameUrl: nameUrl,
-      //   userId: userId,
-      //   prLink: prLink
-      // })
-      // .then(function (response) {
-      //   console.log(response);
-      //   if(response.status == 200){
-      //     comment = "Hey ["+name+"]("+nameUrl+"), your [Pull Request]("+prLink+") has been received by Spect!";
-      //   }else{
-      //     comment = "Hey ["+name+"]("+nameUrl+"), it looks like there's some issue with updating your progress";
-      //   }
-      // })
-      // .catch(function (error) {
-      //   console.log(error);
-      // });
+        const name = String(context.payload.pull_request.user.login);
+        const nameUrl = String(context.payload.pull_request.user.url);
+        const prLink = String(context.payload.pull_request.html_url);
 
-      if(essential == "Spect"){
+        var data = {
+          "updates":{
+              "columnChange": {
+                  "sourceId": "column-0",
+                  "destinationId": "column-2"
+              },
+              "status": 200
+          }
+        }
+
+        var config = {
+          method: 'get',
+          url: `${server_url}/functions/updateCard?_ApplicationId=${app_id}&taskId=${taskId}&link=${prLink}&user=${name}`,
+          data: data
+        };
+
+        await axios(config)
+        .then(function (response) {
+          console.log(response.data);
+          if(response.status == 200){
+            comment = "Hey ["+name+"]("+nameUrl+"), your [Pull Request]("+prLink+") has been received by Spect!";
+          }else{
+            comment = "Hey ["+name+"]("+nameUrl+"), it looks like there's some issue with updating your progress";
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
         const issueComment = context.issue({
           body: comment,
         });
-        context.log.info(comment);
         return context.octokit.issues.createComment(issueComment);
         } 
       }
@@ -74,6 +85,9 @@ module.exports = (app) => {
 
   // To get your app running against GitHub, see:
   // https://probot.github.io/docs/development/
+
+// const comment = "Hey ["+name+"]("+nameUrl+"), your [Pull Request]("+prLink+") has been received by Spect!"; 
+
 
 
 
