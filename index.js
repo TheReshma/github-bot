@@ -22,13 +22,13 @@ module.exports = (app) => {
   
   app.log.info("Yay, the app has loaded!");
   
-  app.on('pull_request.opened', receive);
+  app.on('pull_request.opened', opened);
 
   const server_url = process.env.MORALIS_SERVER_ID ;
   const app_id = process.env.MORALIS_APPLICATION_ID;
   let comment ;
   
-    async function receive(context) {
+    async function opened(context) {
 
       const prhead = String(context.payload.pull_request.title).trim();
       const keywords = prhead.split(' ',2);
@@ -43,11 +43,7 @@ module.exports = (app) => {
 
         var data = {
           "updates":{
-              "columnChange": {
-                  "sourceId": "column-0",
-                  "destinationId": "column-2"
-              },
-              "status": 200
+              "status": 200,
           }
         }
 
@@ -76,7 +72,41 @@ module.exports = (app) => {
         return context.octokit.issues.createComment(issueComment);
         } 
       }
-    };
+
+
+  app.on('pull_request.merged', merged);
+
+    async function merged(context) {
+
+      const prhead = String(context.payload.pull_request.title).trim();
+      const keywords = prhead.split(' ',2);
+      const essential = keywords[0];
+      const taskId = keywords[1];
+
+      if (essential == "Spect"){
+
+        var data = {
+          "updates":{
+              "status": 205
+          }
+        }
+
+        var config = {
+          method: 'get',
+          url: `${server_url}/functions/updateCard?_ApplicationId=${app_id}&taskId=${taskId}&user=${name}`,
+          data: data
+        };
+
+        await axios(config)
+        .then(function (response) {
+          console.log(response.data);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      } 
+    }
+};
 
   
 
