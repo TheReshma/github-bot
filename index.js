@@ -69,15 +69,18 @@ module.exports = (app) => {
     }
 
   async function closed(context) {
+
     const mergeState = context.payload.pull_request.merged;
     const prhead = String(context.payload.pull_request.title).trim();
-    const prLink = String(context.payload.pull_request.html_url);
-    const name = String(context.payload.pull_request.user.login);
     const keywords = prhead.split(' ',2);
     const essential = keywords[0];
     const taskId = keywords[1];
 
     if (essential == "Spect" & mergeState == true){
+
+      const prLink = String(context.payload.pull_request.html_url);
+      const name = String(context.payload.pull_request.user.login);
+
       var data = {
         "updates":{
             "status": 205
@@ -98,16 +101,7 @@ module.exports = (app) => {
     } 
   }
 };
-
-  
-
-  // For more information on building apps:
-  // https://probot.github.io/docs/
-
-  // To get your app running against GitHub, see:
-  // https://probot.github.io/docs/development/
-
-// const comment = "Hey ["+name+"]("+nameUrl+"), your [Pull Request]("+prLink+") has been received by Spect!"; 
+ 
 
 
 
